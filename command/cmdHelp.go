@@ -26,9 +26,9 @@ func NewHelpCommand() *HelpCommand {
 	return cmd
 }
 
-func (cmd *HelpCommand) Apply(_ *manager.Manager) error {
+func (cmd *HelpCommand) Apply(m *manager.Manager) error {
 
-	logger.Info("TODO: USAGE")
+	m.GetLogger().Info("TODO: USAGE")
 
 	/*
 		Commands:
@@ -72,6 +72,9 @@ func (cmd *HelpCommand) Apply(_ *manager.Manager) error {
 
 			SYSTAGS_SYSTEM_DIR
 				=/var/lib/systags
+
+			SYSTAGS_DEBUG
+				=
 	*/
 
 	return nil

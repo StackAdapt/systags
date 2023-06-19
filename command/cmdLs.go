@@ -77,7 +77,7 @@ func (cmd *LsCommand) Apply(m *manager.Manager) error {
 		return err
 	}
 
-	logger.Info(out)
+	m.GetLogger().Info(out)
 
 	return nil
 }

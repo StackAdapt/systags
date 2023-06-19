@@ -53,7 +53,7 @@ func (cmd *GetCommand) Apply(m *manager.Manager) error {
 		return err
 	}
 
-	logger.Info(m.GetTag(cmd.key, cmd.def))
+	m.GetLogger().Info(m.GetTag(cmd.key, cmd.def))
 
 	return nil
 }

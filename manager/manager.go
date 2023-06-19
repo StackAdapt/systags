@@ -8,12 +8,16 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"golang.org/x/exp/slog"
 )
 
 // TODO: Documentation
 type Manager struct {
 	ConfigDir string
 	SystemDir string
+
+	logger *slog.Logger
 
 	config Tags
 	remote Tags
@@ -31,11 +35,28 @@ func NewManager() *Manager {
 	m := Manager{
 		ConfigDir: "/etc/systags.d",
 		SystemDir: "/var/lib/systags",
+		logger:    slog.Default(),
 	}
 
 	m.Reset()
 
 	return &m
+}
+
+// TODO: Documentation
+func (m *Manager) GetLogger() *slog.Logger {
+	return m.logger
+}
+
+// TODO: Documentation
+func (m *Manager) SetLogger(l *slog.Logger) {
+
+	if l == nil {
+		// Avoid invalid loggers
+		m.logger = slog.Default()
+	} else {
+		m.logger = l
+	}
 }
 
 // TODO: Documentation

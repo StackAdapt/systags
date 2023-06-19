@@ -79,7 +79,7 @@ func (cmd *DumpCommand) Apply(m *manager.Manager) error {
 		return err
 	}
 
-	logger.Info(string(out))
+	m.GetLogger().Info(string(out))
 
 	return nil
 }

@@ -18,6 +18,8 @@ var Commands = map[string]Command{
 
 func ParseArgs(m *manager.Manager, args []string) error {
 
+	logger := m.GetLogger()
+
 	// Minimum arguments
 	if len(args) >= 2 {
 

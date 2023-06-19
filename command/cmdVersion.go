@@ -25,7 +25,7 @@ func NewVersionCommand() *VersionCommand {
 	return cmd
 }
 
-func (cmd *VersionCommand) Apply(_ *manager.Manager) error {
+func (cmd *VersionCommand) Apply(m *manager.Manager) error {
 
 	result := fmt.Sprintf(
 		"%s/%s",
@@ -33,7 +33,7 @@ func (cmd *VersionCommand) Apply(_ *manager.Manager) error {
 		manager.Version(),
 	)
 
-	logger.Info(result)
+	m.GetLogger().Info(result)
 
 	return nil
 }

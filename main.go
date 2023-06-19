@@ -14,35 +14,30 @@ import (
 
 type LogHandler struct {
 	slog.Handler
-	info  *log.Logger
-	warn  *log.Logger
-	error *log.Logger
+	out *log.Logger
+	err *log.Logger
 }
 
 func (log *LogHandler) Handle(_ context.Context, r slog.Record) error {
 
 	switch r.Level {
+	case slog.LevelDebug:
+		log.out.Println(color.HiBlackString(r.Message))
+
 	case slog.LevelInfo:
-		log.info.Println(r.Message)
+		log.out.Println(r.Message)
 
 	case slog.LevelWarn:
-		log.warn.Println(color.YellowString(r.Message))
+		log.err.Println(color.YellowString(r.Message))
 
 	case slog.LevelError:
-		log.error.Println(color.RedString(r.Message))
+		log.err.Println(color.RedString(r.Message))
 	}
 
 	return nil
 }
 
 func main() {
-
-	logger := slog.New(&LogHandler{
-		Handler: slog.NewTextHandler(os.Stdout, nil),
-		info:    log.New(os.Stdout, "", 0),
-		warn:    log.New(os.Stderr, "", 0),
-		error:   log.New(os.Stderr, "", 0),
-	})
 
 	m := manager.NewManager()
 
@@ -57,7 +52,28 @@ func main() {
 		m.SystemDir = systemDir
 	}
 
-	command.SetLogger(logger)
+	debug := os.Getenv("SYSTAGS_DEBUG")
+
+	var loggerOpts *slog.HandlerOptions
+
+	if debug == "" {
+		loggerOpts = &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		}
+	} else {
+		loggerOpts = &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		}
+	}
+
+	logger := slog.New(&LogHandler{
+		Handler: slog.NewTextHandler(os.Stdout, loggerOpts),
+		out:     log.New(os.Stdout, "", 0),
+		err:     log.New(os.Stderr, "", 0),
+	})
+
+	m.SetLogger(logger)
+
 	// Perform CLI parsing, errors are logged using logger
 	if err := command.ParseArgs(m, os.Args); err != nil {
 		os.Exit(1)
