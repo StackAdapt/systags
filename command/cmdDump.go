@@ -2,11 +2,10 @@ package command
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
-	"os"
 
 	"github.com/StackAdapt/systags/manager"
-	"github.com/StackAdapt/systags/utility"
 )
 
 type DumpCommand struct {
@@ -31,7 +30,7 @@ func NewDumpCommand() *DumpCommand {
 	return cmd
 }
 
-func (cmd *DumpCommand) Init(args []string) error {
+func (cmd *DumpCommand) Parse(args []string) error {
 
 	err := cmd.flagSet.Parse(args)
 	if err != nil {
@@ -45,16 +44,16 @@ func (cmd *DumpCommand) Init(args []string) error {
 		break
 
 	case "":
-		return cmd.failf("flag needs to be provided: -kind")
+		return errors.New("flag needs to be provided: -kind")
 
 	default:
-		return cmd.failf("flag has unsupported value: -kind")
+		return errors.New("flag has unsupported value: -kind")
 	}
 
 	return nil
 }
 
-func (cmd *DumpCommand) Run(m *manager.Manager) error {
+func (cmd *DumpCommand) Apply(m *manager.Manager) error {
 
 	err := m.LoadFiles()
 	if err != nil {
@@ -80,10 +79,7 @@ func (cmd *DumpCommand) Run(m *manager.Manager) error {
 		return err
 	}
 
-	utility.Fprintln(
-		os.Stdout,
-		string(out),
-	)
+	logger.Info(string(out))
 
 	return nil
 }

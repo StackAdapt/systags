@@ -2,10 +2,9 @@ package command
 
 import (
 	"flag"
-	"os"
+	"fmt"
 
 	"github.com/StackAdapt/systags/manager"
-	"github.com/StackAdapt/systags/utility"
 )
 
 type VersionCommand struct {
@@ -26,14 +25,15 @@ func NewVersionCommand() *VersionCommand {
 	return cmd
 }
 
-func (cmd *VersionCommand) Run(_ *manager.Manager) error {
+func (cmd *VersionCommand) Apply(_ *manager.Manager) error {
 
-	utility.Fprintf(
-		os.Stdout,
-		"%s/%s\n",
+	result := fmt.Sprintf(
+		"%s/%s",
 		manager.AppName(),
 		manager.Version(),
 	)
+
+	logger.Info(result)
 
 	return nil
 }

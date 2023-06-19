@@ -1,34 +1,34 @@
 package command
 
 import (
-	"errors"
 	"flag"
-	"fmt"
-	"os"
 
 	"github.com/StackAdapt/systags/manager"
-	"github.com/StackAdapt/systags/utility"
 )
 
-type Command interface {
-	Init([]string) error
-	Run(m *manager.Manager) error
-	Usage() string
+type HelpCommand struct {
+	baseCommand
 }
 
-type baseCommand struct {
-	flagSet *flag.FlagSet
+func NewHelpCommand() *HelpCommand {
+
+	cmd := &HelpCommand{
+		baseCommand: baseCommand{
+			flagSet: flag.NewFlagSet("", flag.ContinueOnError),
+		},
+	}
+
+	// NOTE: Help command should not include any additional flags
+
+	// Don't print unneeded usage
+	cmd.flagSet.Usage = func() {}
+
+	return cmd
 }
 
-func (cmd *baseCommand) Init(args []string) error {
-	return cmd.flagSet.Parse(args)
-}
+func (cmd *HelpCommand) Apply(_ *manager.Manager) error {
 
-func (cmd *baseCommand) Run(_ *manager.Manager) error {
-	return nil
-}
-
-func (cmd *baseCommand) Usage() string {
+	logger.Info("TODO: USAGE")
 
 	/*
 		Commands:
@@ -74,13 +74,7 @@ func (cmd *baseCommand) Usage() string {
 				=/var/lib/systags
 	*/
 
-	return "TODO: USAGE"
-}
 
-func (cmd *baseCommand) failf(format string, a ...any) error {
 
-	msg := fmt.Sprintf(format, a...)
-	utility.Fprintln(os.Stderr, msg)
-	cmd.flagSet.Usage()
-	return errors.New(msg)
+	return nil
 }

@@ -1,14 +1,48 @@
 package main
 
 import (
+	"context"
+	"log"
 	"os"
+
+	"github.com/fatih/color"
+	"golang.org/x/exp/slog"
 
 	"github.com/StackAdapt/systags/command"
 	"github.com/StackAdapt/systags/manager"
-	"github.com/StackAdapt/systags/utility"
 )
 
+type LogHandler struct {
+	slog.Handler
+	info  *log.Logger
+	warn  *log.Logger
+	error *log.Logger
+}
+
+func (log *LogHandler) Handle(_ context.Context, r slog.Record) error {
+
+	switch r.Level {
+	case slog.LevelInfo:
+		log.info.Println(r.Message)
+
+	case slog.LevelWarn:
+		log.warn.Println(color.YellowString(r.Message))
+
+	case slog.LevelError:
+		log.error.Println(color.RedString(r.Message))
+	}
+
+	return nil
+}
+
 func main() {
+
+	logger := slog.New(&LogHandler{
+		Handler: slog.NewTextHandler(os.Stdout, nil),
+		info:    log.New(os.Stdout, "", 0),
+		warn:    log.New(os.Stderr, "", 0),
+		error:   log.New(os.Stderr, "", 0),
+	})
 
 	m := manager.NewManager()
 
@@ -23,36 +57,9 @@ func main() {
 		m.SystemDir = systemDir
 	}
 
-	help := true
-	// Ensure min arguments
-	if len(os.Args) >= 2 {
-
-		// Attempt to find the associated command
-		cmd, found := command.Commands[os.Args[1]]
-
-		if found {
-			// Attempt to initialize the requested command
-			if err := cmd.Init(os.Args[2:]); err != nil {
-				// No need to print since Init does that
-				os.Exit(1)
-			}
-
-			// Attempt to execute the command
-			if err := cmd.Run(m); err != nil {
-				utility.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
-
-			help = false
-		}
-	}
-
-	if help {
-		// Print out top-level usage instructions
-		if err := command.Commands["help"].Run(m); err != nil {
-			panic(err)
-		}
-
+	command.SetLogger(logger)
+	// Perform CLI parsing, errors are logged using logger
+	if err := command.ParseArgs(m, os.Args); err != nil {
 		os.Exit(1)
 	}
 }

@@ -1,19 +1,21 @@
 package command
 
 import (
+	"errors"
 	"flag"
 
 	"github.com/StackAdapt/systags/manager"
 )
 
-type RmCommand struct {
+type GetCommand struct {
 	baseCommand
 	key string
+	def string
 }
 
-func NewRmCommand() *RmCommand {
+func NewGetCommand() *GetCommand {
 
-	cmd := &RmCommand{
+	cmd := &GetCommand{
 		baseCommand: baseCommand{
 			flagSet: flag.NewFlagSet("", flag.ContinueOnError),
 		},
@@ -21,6 +23,8 @@ func NewRmCommand() *RmCommand {
 
 	cmd.flagSet.StringVar(&cmd.key, "k", "", "")
 	cmd.flagSet.StringVar(&cmd.key, "key", "", "")
+	cmd.flagSet.StringVar(&cmd.def, "d", "", "")
+	cmd.flagSet.StringVar(&cmd.def, "default", "", "")
 
 	// Don't print unneeded usage
 	cmd.flagSet.Usage = func() {}
@@ -28,7 +32,7 @@ func NewRmCommand() *RmCommand {
 	return cmd
 }
 
-func (cmd *RmCommand) Init(args []string) error {
+func (cmd *GetCommand) Parse(args []string) error {
 
 	err := cmd.flagSet.Parse(args)
 	if err != nil {
@@ -36,25 +40,20 @@ func (cmd *RmCommand) Init(args []string) error {
 	}
 
 	if cmd.key == "" {
-		return cmd.failf("flag needs to be provided: -key")
+		return errors.New("flag needs to be provided: -key")
 	}
 
 	return nil
 }
 
-func (cmd *RmCommand) Run(m *manager.Manager) error {
+func (cmd *GetCommand) Apply(m *manager.Manager) error {
 
 	err := m.LoadFiles()
 	if err != nil {
 		return err
 	}
 
-	m.RemoveTag(cmd.key)
-
-	err = m.SaveFiles()
-	if err != nil {
-		return err
-	}
+	logger.Info(m.GetTag(cmd.key, cmd.def))
 
 	return nil
 }

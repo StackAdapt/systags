@@ -1,11 +1,10 @@
 package command
 
 import (
+	"errors"
 	"flag"
-	"os"
 
 	"github.com/StackAdapt/systags/manager"
-	"github.com/StackAdapt/systags/utility"
 )
 
 type LsCommand struct {
@@ -39,7 +38,7 @@ func NewLsCommand() *LsCommand {
 	return cmd
 }
 
-func (cmd *LsCommand) Init(args []string) error {
+func (cmd *LsCommand) Parse(args []string) error {
 
 	err := cmd.flagSet.Parse(args)
 	if err != nil {
@@ -47,19 +46,19 @@ func (cmd *LsCommand) Init(args []string) error {
 	}
 
 	if cmd.format == "" {
-		return cmd.failf("flag needs to be provided: -format")
+		return errors.New("flag needs to be provided: -format")
 	}
 
 	// If the specified format is supported
 	_, found := manager.Formats[cmd.format]
 	if !found {
-		return cmd.failf("flag has unsupported value: -format")
+		return errors.New("flag has unsupported value: -format")
 	}
 
 	return nil
 }
 
-func (cmd *LsCommand) Run(m *manager.Manager) error {
+func (cmd *LsCommand) Apply(m *manager.Manager) error {
 
 	err := m.LoadFiles()
 	if err != nil {
@@ -78,9 +77,7 @@ func (cmd *LsCommand) Run(m *manager.Manager) error {
 		return err
 	}
 
-	utility.Fprintln(
-		os.Stdout, out,
-	)
+	logger.Info(out)
 
 	return nil
 }

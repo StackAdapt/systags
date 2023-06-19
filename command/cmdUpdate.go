@@ -2,25 +2,26 @@ package command
 
 import (
 	"flag"
+	"time"
 
 	"github.com/StackAdapt/systags/manager"
 )
 
-type InitCommand struct {
+type UpdateCommand struct {
 	baseCommand
-	reset bool
+	timeout time.Duration
 }
 
-func NewInitCommand() *InitCommand {
+func NewUpdateCommand() *UpdateCommand {
 
-	cmd := &InitCommand{
+	cmd := &UpdateCommand{
 		baseCommand: baseCommand{
 			flagSet: flag.NewFlagSet("", flag.ContinueOnError),
 		},
 	}
 
-	cmd.flagSet.BoolVar(&cmd.reset, "r", false, "")
-	cmd.flagSet.BoolVar(&cmd.reset, "reset", false, "")
+	cmd.flagSet.DurationVar(&cmd.timeout, "t", 5*time.Second, "")
+	cmd.flagSet.DurationVar(&cmd.timeout, "timeout", 5*time.Second, "")
 
 	// Don't print unneeded usage
 	cmd.flagSet.Usage = func() {}
@@ -28,15 +29,16 @@ func NewInitCommand() *InitCommand {
 	return cmd
 }
 
-func (cmd *InitCommand) Run(m *manager.Manager) error {
+func (cmd *UpdateCommand) Apply(m *manager.Manager) error {
 
 	err := m.LoadFiles()
 	if err != nil {
 		return err
 	}
 
-	if cmd.reset {
-		m.Reset()
+	err = m.UpdateRemote(cmd.timeout)
+	if err != nil {
+		return err
 	}
 
 	err = m.SaveFiles()
