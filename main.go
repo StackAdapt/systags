@@ -52,18 +52,15 @@ func main() {
 		m.SystemDir = systemDir
 	}
 
-	debug := os.Getenv("SYSTAGS_DEBUG")
-
-	var loggerOpts *slog.HandlerOptions
-
-	if debug == "" {
-		loggerOpts = &slog.HandlerOptions{
-			Level: slog.LevelInfo,
-		}
+	var level slog.Level
+	if os.Getenv("SYSTAGS_DEBUG") == "" {
+		level = slog.LevelInfo
 	} else {
-		loggerOpts = &slog.HandlerOptions{
-			Level: slog.LevelDebug,
-		}
+		level = slog.LevelDebug
+	}
+
+	loggerOpts := &slog.HandlerOptions{
+		Level: level,
 	}
 
 	logger := slog.New(&LogHandler{

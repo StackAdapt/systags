@@ -12,6 +12,9 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+// Tags describe a map of key/value pairs
+type Tags map[string]string
+
 // TODO: Documentation
 type Manager struct {
 	ConfigDir string
@@ -235,7 +238,7 @@ func (m *Manager) UpdateRemote(timeout time.Duration) error {
 	// which cloud provider is being used and add the feature
 	// to update the tags similar to how it's done now in AWS.
 
-	result, err := getAwsTags(timeout)
+	result, err := getAwsTags(m.logger, timeout)
 	if err != nil {
 		return err
 	}
@@ -263,16 +266,11 @@ func (m *Manager) SystemTags() Tags {
 }
 
 // TODO: Documentation
-func (m *Manager) FormatTags(
+func (m *Manager) GetTags(
 	regex bool,
 	pick string,
 	omit string,
-	format Format,
-) (string, error) {
-
-	if format == nil {
-		return "", nil
-	}
+) Tags {
 
 	if !regex && pick != "" {
 
@@ -353,7 +351,7 @@ func (m *Manager) FormatTags(
 		}
 	}
 
-	return format(omited)
+	return omited
 }
 
 // TODO: Documentation

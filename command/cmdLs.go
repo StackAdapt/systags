@@ -65,14 +65,13 @@ func (cmd *LsCommand) Apply(m *manager.Manager) error {
 		return err
 	}
 
+	tags := m.GetTags(cmd.regex, cmd.pick, cmd.omit)
+
 	// Retrieve the specified format method
 	format, _ := manager.Formats[cmd.format]
 
-	// Attempt to format tags
-	out, err := m.FormatTags(
-		cmd.regex, cmd.pick, cmd.omit, format,
-	)
-
+	// Use format for output
+	out, err := format(tags)
 	if err != nil {
 		return err
 	}

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
+	"gopkg.in/yaml.v3"
 )
 
 // TODO: Documentation
@@ -15,6 +16,30 @@ func FormatJson(tags Tags) (string, error) {
 
 	// Try and convert specified tags data to JSON
 	out, err := json.MarshalIndent(tags, "", "  ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
+}
+
+// TODO: Documentation
+func FormatYaml(tags Tags) (string, error) {
+
+	// Try to convert tags to YAML
+	out, err := yaml.Marshal(tags)
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
+}
+
+// TODO: Documentation
+func FormatToml(tags Tags) (string, error) {
+
+	// Try to convert tags to TOML
+	out, err := toml.Marshal(tags)
 	if err != nil {
 		return "", err
 	}
@@ -112,6 +137,8 @@ type Format func(Tags) (string, error)
 // TODO: Documentation
 var Formats = map[string]Format{
 	"json":     FormatJson,
+	"yaml":     FormatYaml,
+	"toml":     FormatToml,
 	"consul":   FormatConsul,
 	"env":      FormatEnv,
 	"telegraf": FormatTelegraf,

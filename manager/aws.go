@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/exp/slog"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
@@ -32,10 +34,9 @@ func getAwsMetadata(
 	}
 
 	defer func() {
-		// Perform close operation
-		err = result.Content.Close()
+		err := result.Content.Close()
 		if err != nil {
-			panic(err)
+			// Ignore
 		}
 	}()
 
@@ -48,7 +49,9 @@ func getAwsMetadata(
 	return string(value), nil
 }
 
-func getAwsTags(timeout time.Duration) (Tags, error) {
+func getAwsTags(logger *slog.Logger, timeout time.Duration) (Tags, error) {
+
+	logger.Debug("getting aws tags")
 
 	// Load a default AWS configuration
 	cfg, err := config.LoadDefaultConfig(context.Background())
@@ -62,14 +65,14 @@ func getAwsTags(timeout time.Duration) (Tags, error) {
 	)
 	defer cancel()
 
-	// TODO: Implement version 2 of IMDS
-
 	// Create new IMDS client from config
 	imdsClient := imds.NewFromConfig(cfg)
 
 	// Check if the tags can be retrieved using instance metadata
 	tags, err := getAwsMetadata(imdsClient, ctx, "tags/instance")
 	if err == nil {
+
+		logger.Debug("using instance metadata")
 
 		// Convert the tags into a slice
 		keys := strings.Split(tags, "\n")
@@ -90,6 +93,8 @@ func getAwsTags(timeout time.Duration) (Tags, error) {
 		return output, nil
 
 	} else {
+
+		logger.Debug("using describe tags")
 
 		// Attempt to get own instance ID
 		instanceID, err := getAwsMetadata(imdsClient, ctx, "instance-id")
