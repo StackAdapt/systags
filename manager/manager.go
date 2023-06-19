@@ -82,6 +82,8 @@ func (m *Manager) LoadFiles() error {
 
 	if err == nil {
 
+		m.logger.Debug("reading config directory: " + m.ConfigDir)
+
 		// Iterate through all config files
 		for _, file := range configFiles {
 
@@ -98,6 +100,8 @@ func (m *Manager) LoadFiles() error {
 
 			// Construct the full path to the current config file
 			configFile := filepath.Join(m.ConfigDir, file.Name())
+
+			m.logger.Debug(configFile)
 
 			// Attempt to read the contents of the file
 			configBytes, err := os.ReadFile(configFile)
@@ -126,6 +130,8 @@ func (m *Manager) LoadFiles() error {
 	// Check if remote file exists and then read it
 	if _, err := os.Stat(remoteFile); err == nil {
 
+		m.logger.Debug("reading remote file: " + remoteFile)
+
 		// Attempt to read the contents of the file
 		remoteBytes, err := os.ReadFile(remoteFile)
 		if err != nil {
@@ -141,6 +147,8 @@ func (m *Manager) LoadFiles() error {
 
 	// Check if system file exists and then read it
 	if _, err := os.Stat(systemFile); err == nil {
+
+		m.logger.Debug("reading system file: " + systemFile)
 
 		// Attempt to read the contents of the file
 		systemBytes, err := os.ReadFile(systemFile)
@@ -184,6 +192,10 @@ func (m *Manager) SaveFiles() error {
 	// Check if remote file exists and then read it
 	if _, err := os.Stat(remoteFile); err == nil {
 
+		remoteBackup := remoteFile + ".bak"
+
+		m.logger.Debug("writing remote backup: " + remoteBackup)
+
 		// Attempt to read the contents of the file
 		remoteBytes, err := os.ReadFile(remoteFile)
 		if err != nil {
@@ -191,7 +203,7 @@ func (m *Manager) SaveFiles() error {
 		}
 
 		// Try and backup the contents of the file
-		err = os.WriteFile(remoteFile+".bak", remoteBytes, 0666)
+		err = os.WriteFile(remoteBackup, remoteBytes, 0666)
 		if err != nil {
 			return err
 		}
@@ -200,6 +212,10 @@ func (m *Manager) SaveFiles() error {
 	// Check if system file exists and then read it
 	if _, err := os.Stat(systemFile); err == nil {
 
+		systemBackup := systemFile + ".bak"
+
+		m.logger.Debug("writing system backup: " + systemBackup)
+
 		// Attempt to read the contents of the file
 		systemBytes, err := os.ReadFile(systemFile)
 		if err != nil {
@@ -207,17 +223,21 @@ func (m *Manager) SaveFiles() error {
 		}
 
 		// Try and backup the contents of the file
-		err = os.WriteFile(systemFile+".bak", systemBytes, 0666)
+		err = os.WriteFile(systemBackup, systemBytes, 0666)
 		if err != nil {
 			return err
 		}
 	}
+
+	m.logger.Debug("writing remote file: " + remoteFile)
 
 	// Attempt to write the current tag content
 	err = os.WriteFile(remoteFile, remoteJson, 0666)
 	if err != nil {
 		return err
 	}
+
+	m.logger.Debug("writing system file: " + systemFile)
 
 	// Attempt to write the current tag content
 	err = os.WriteFile(systemFile, systemJson, 0666)
