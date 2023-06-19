@@ -74,7 +74,5 @@ func (cmd *HelpCommand) Apply(_ *manager.Manager) error {
 				=/var/lib/systags
 	*/
 
-
-
 	return nil
 }
