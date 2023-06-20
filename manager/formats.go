@@ -11,7 +11,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// TODO: Documentation
+// FormatJson attempts to convert tags into a JSON
+// string. Returns error if the conversion fails.
 func FormatJson(tags Tags) (string, error) {
 
 	// Try and convert specified tags data to JSON
@@ -23,7 +24,8 @@ func FormatJson(tags Tags) (string, error) {
 	return string(out), nil
 }
 
-// TODO: Documentation
+// FormatYaml attempts to convert tags into a YAML
+// string. Returns error if the conversion fails.
 func FormatYaml(tags Tags) (string, error) {
 
 	// Try to convert tags to YAML
@@ -35,7 +37,8 @@ func FormatYaml(tags Tags) (string, error) {
 	return string(out), nil
 }
 
-// TODO: Documentation
+// FormatToml attempts to convert tags into a TOML
+// string. Returns error if the conversion fails.
 func FormatToml(tags Tags) (string, error) {
 
 	// Try to convert tags to TOML
@@ -47,25 +50,9 @@ func FormatToml(tags Tags) (string, error) {
 	return string(out), nil
 }
 
-// TODO: Documentation
-func FormatConsul(tags Tags) (string, error) {
-
-	consul := struct {
-		NodeMeta Tags `json:"node_meta"`
-	}{
-		NodeMeta: tags,
-	}
-
-	// Try and convert specified consul data to JSON
-	out, err := json.MarshalIndent(consul, "", "  ")
-	if err != nil {
-		return "", err
-	}
-
-	return string(out), nil
-}
-
-// TODO: Documentation
+// FormatEnv attempts to convert tags into a string
+// compatible with shell environment variables. Returns
+// error if the conversion fails.
 func FormatEnv(tags Tags) (string, error) {
 
 	// Regex to replace invalid Bash characters
@@ -109,7 +96,10 @@ func FormatEnv(tags Tags) (string, error) {
 	return strings.Trim(result, " "), nil
 }
 
-// TODO: Documentation
+// FormatTelegraf attempts to convert tags into a
+// string which could be stored as a config file
+// for Telegraf by InfluxData. Returns error if the
+// conversion fails.
 func FormatTelegraf(tags Tags) (string, error) {
 
 	telegraf := struct {
@@ -131,15 +121,38 @@ func FormatTelegraf(tags Tags) (string, error) {
 	return out.String(), nil
 }
 
-// TODO: Documentation
+// FormatConsul attempts to convert tags into a
+// string which could be stored as a config file
+// for Consul by HashiCorp. Returns error if the
+// conversion fails.
+func FormatConsul(tags Tags) (string, error) {
+
+	consul := struct {
+		NodeMeta Tags `json:"node_meta"`
+	}{
+		NodeMeta: tags,
+	}
+
+	// Try and convert specified consul data to JSON
+	out, err := json.MarshalIndent(consul, "", "  ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
+}
+
+// Format is a type that defines a function signature
+// for formatting tags into a specific string format.
 type Format func(Tags) (string, error)
 
-// TODO: Documentation
+// Formats is a registry of tag formatting functions.
 var Formats = map[string]Format{
 	"json":     FormatJson,
 	"yaml":     FormatYaml,
+	"yml":      FormatYaml,
 	"toml":     FormatToml,
-	"consul":   FormatConsul,
 	"env":      FormatEnv,
 	"telegraf": FormatTelegraf,
+	"consul":   FormatConsul,
 }

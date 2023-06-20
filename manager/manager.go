@@ -15,9 +15,15 @@ import (
 // Tags describe a map of key/value pairs
 type Tags map[string]string
 
-// TODO: Documentation
+// Manager maintains instance information
+// for the type which includes in-memory
+// representations of the tags as well as
+// configurable options.
 type Manager struct {
+	// The directory for the config files
 	ConfigDir string
+
+	// The directory for the system files
 	SystemDir string
 
 	logger *slog.Logger
@@ -27,7 +33,8 @@ type Manager struct {
 	system Tags
 }
 
-// TODO: Documentation
+// NewManager initializes a new Manager with
+// default configurations and directories.
 func NewManager() *Manager {
 
 	// TODO:
@@ -46,12 +53,13 @@ func NewManager() *Manager {
 	return &m
 }
 
-// TODO: Documentation
+// GetLogger returns the current logger from the Manager.
 func (m *Manager) GetLogger() *slog.Logger {
 	return m.logger
 }
 
-// TODO: Documentation
+// SetLogger sets a new logger for the Manager. If the
+// provided logger is nil, it will reset it to default.
 func (m *Manager) SetLogger(l *slog.Logger) {
 
 	if l == nil {
@@ -62,7 +70,8 @@ func (m *Manager) SetLogger(l *slog.Logger) {
 	}
 }
 
-// TODO: Documentation
+// Reset clears the current in-memory representation
+// of this Manager's config, remote, and system tags.
 func (m *Manager) Reset() {
 
 	m.config = make(Tags)
@@ -70,7 +79,9 @@ func (m *Manager) Reset() {
 	m.system = make(Tags)
 }
 
-// TODO: Documentation
+// LoadFiles reads files from the Manager's ConfigDir
+// and SystemDir and stores their contents in the
+// Manager's internal config, remote, and system tags.
 func (m *Manager) LoadFiles() error {
 
 	configData := make(Tags)
@@ -170,7 +181,10 @@ func (m *Manager) LoadFiles() error {
 	return nil
 }
 
-// TODO: Documentation
+// SaveFiles saves the current state of the Manager's
+// remote and system tags to corresponding files in
+// the SystemDir. Before writing new data, it attempts
+// to create a backup of the existing files.
 func (m *Manager) SaveFiles() error {
 
 	// Construct the full path to the system directory files
@@ -248,7 +262,9 @@ func (m *Manager) SaveFiles() error {
 	return nil
 }
 
-// TODO: Documentation
+// UpdateRemote fetches remote tags from the instance
+// it's currently running on. This operation may take
+// some time to complete, controlled by timeout.
 func (m *Manager) UpdateRemote(timeout time.Duration) error {
 
 	// TODO:
@@ -267,25 +283,31 @@ func (m *Manager) UpdateRemote(timeout time.Duration) error {
 	return nil
 }
 
-// TODO: Documentation
+// ConfigTags returns the Manager's config tags.
 func (m *Manager) ConfigTags() Tags {
 
 	return m.config
 }
 
-// TODO: Documentation
+// RemoteTags returns the Manager's remote tags.
 func (m *Manager) RemoteTags() Tags {
 
 	return m.remote
 }
 
-// TODO: Documentation
+// SystemTags returns the Manager's system tags.
 func (m *Manager) SystemTags() Tags {
 
 	return m.system
 }
 
-// TODO: Documentation
+// GetTags returns the combined set of config, system,
+// and remote tags, but it filters the tags based on
+// regular expressions provided in the "pick" and "omit"
+// parameters. If the "regex" parameter is set to false,
+// the function treats the "pick" and "omit" parameters
+// as comma-separated lists of exact keys to include or
+// exclude, respectively.
 func (m *Manager) GetTags(
 	regex bool,
 	pick string,
@@ -374,7 +396,9 @@ func (m *Manager) GetTags(
 	return omited
 }
 
-// TODO: Documentation
+// GetTag returns a tag by its key from system, config,
+// or remote tags, in that order. If the key doesn't exist
+// in any of the tag sets, it returns the default value.
 func (m *Manager) GetTag(key string, def string) string {
 
 	// Whether system has the key
@@ -398,7 +422,9 @@ func (m *Manager) GetTag(key string, def string) string {
 	return def
 }
 
-// TODO: Documentation
+// SetTag sets a tag with the specified key and value in
+// the system tags. It returns the previous value of the
+// tag, or an empty string if the tag did not exist.
 func (m *Manager) SetTag(key string, val string) string {
 
 	// Retrieve the current value
@@ -409,7 +435,9 @@ func (m *Manager) SetTag(key string, val string) string {
 	return existing
 }
 
-// TODO: Documentation
+// RemoveTag removes a tag with the specified key from
+// the system tags. It returns the previous value of the
+// tag, or an empty string if the tag did not exist.
 func (m *Manager) RemoveTag(key string) string {
 
 	// Retrieve the current value
