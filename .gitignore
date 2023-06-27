@@ -1,6 +1,9 @@
 # Generic
 .DS_Store
 
+# Bin
+/bin/
+
 # Logs
 *.log
 /logs/
