@@ -36,32 +36,34 @@ func (cmd *HelpCommand) Apply(m *manager.Manager) error {
 				<none>
 
 			init
-				-r|--reset (bool) [optional = false]
+				-r|-reset (bool) [optional = false]
 
 			dump
-				-k|--kind (string) [required]
+				-k|-kind (string) [required]
 					config, remote, system
 
 			update
-				-t|--timeout (duration) [optional = 5*time.Second]
+				-t|-timeout (duration) [optional = 5*time.Second]
 
 			ls
-				-r|--regex (bool) [optional = false]
-				-f|--format (string) [optional = json]
+				-r|-regex (bool) [optional = false]
+				-f|-format (string) [optional = json]
 					json, consul, env, telegraf
-				-p|--pick (string) [optional = ""]
-				-o|--omit (string) [optional = ""]
+				-p|-pick (string) [optional = ""]
+				-o|-omit (string) [optional = ""]
+				-e|-prefix (string) [optional = ""]
+				-u|-suffix (string) [optional = ""]
 
 			get
-				-k|--key     (string) [required]
-				-d|--default (string) [optional = ""]
+				-k|-key     (string) [required]
+				-d|-default (string) [optional = ""]
 
 			set
-				-k|--key   (string) [required]
-				-v|--value (string) [required]
+				-k|-key   (string) [required]
+				-v|-value (string) [required]
 
 			rm
-				-k|--key (string) [required]
+				-k|-key (string) [required]
 
 			version
 				<none>

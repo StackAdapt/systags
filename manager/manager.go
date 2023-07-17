@@ -447,3 +447,37 @@ func (m *Manager) RemoveTag(key string) string {
 	delete(m.system, key)
 	return existing
 }
+
+// PrefixTags returns new tags based on the specified
+// tags but with each key prepended with prefix string
+func (m *Manager) PrefixTags(tags Tags, prefix string) Tags {
+
+	if prefix == "" {
+		return tags
+	}
+
+	result := make(Tags)
+	// Loop through specified tags
+	for key, value := range tags {
+		result[prefix+key] = value
+	}
+
+	return result
+}
+
+// SuffixTags returns new tags based on the specified
+// tags but with each key appended with suffix string
+func (m *Manager) SuffixTags(tags Tags, suffix string) Tags {
+
+	if suffix == "" {
+		return tags
+	}
+
+	result := make(Tags)
+	// Loop through specified tags
+	for key, value := range tags {
+		result[key+suffix] = value
+	}
+
+	return result
+}
