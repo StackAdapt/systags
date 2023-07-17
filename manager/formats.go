@@ -50,10 +50,7 @@ func FormatToml(tags Tags) (string, error) {
 	return string(out), nil
 }
 
-// FormatEnv attempts to convert tags into a string
-// compatible with shell environment variables. Returns
-// error if the conversion fails.
-func FormatEnv(tags Tags) (string, error) {
+func convertEnv(tags Tags) Tags {
 
 	// Regex to replace invalid Bash characters
 	validKey := regexp.MustCompile("[^A-Z0-9_]")
@@ -84,6 +81,17 @@ func FormatEnv(tags Tags) (string, error) {
 		filtered[k] = v // Keys are deduplicated here
 	}
 
+	return filtered
+}
+
+// FormatCmd attempts to convert tags into a string
+// compatible with shell environment variables that
+// are combined on a single line. Returns error if
+// the conversion fails.
+func FormatCmd(tags Tags) (string, error) {
+
+	filtered := convertEnv(tags)
+
 	result := ""
 	// Iterate through filtered tags
 	for key, value := range filtered {
@@ -94,6 +102,45 @@ func FormatEnv(tags Tags) (string, error) {
 	}
 
 	return strings.Trim(result, " "), nil
+}
+
+// FormatEnv attempts to convert tags into a string
+// compatible with shell environment variables that
+// are exported on separate lines. Returns error if
+// the conversion fails.
+func FormatEnv(tags Tags) (string, error) {
+
+	filtered := convertEnv(tags)
+
+	result := ""
+	// Iterate through filtered tags
+	for key, value := range filtered {
+
+		result += fmt.Sprintf(
+			"export %s='%s'\n", key, value,
+		)
+	}
+
+	return result, nil
+}
+
+// FormatSystemd attempts to convert tags into a string
+// compatible with systemctl set-environment statements.
+// Returns error if the conversion fails.
+func FormatSystemd(tags Tags) (string, error) {
+
+	filtered := convertEnv(tags)
+
+	result := ""
+	// Iterate through filtered tags
+	for key, value := range filtered {
+
+		result += fmt.Sprintf(
+			"sudo systemctl set-environment %s='%s'\n", key, value,
+		)
+	}
+
+	return result, nil
 }
 
 // FormatTelegraf attempts to convert tags into a
@@ -152,7 +199,9 @@ var Formats = map[string]Format{
 	"yaml":     FormatYaml,
 	"yml":      FormatYaml,
 	"toml":     FormatToml,
+	"cmd":      FormatCmd,
 	"env":      FormatEnv,
+	"systemd":  FormatSystemd,
 	"telegraf": FormatTelegraf,
 	"consul":   FormatConsul,
 }
