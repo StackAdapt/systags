@@ -13,6 +13,8 @@ type LsCommand struct {
 	pick   string
 	omit   string
 	format string
+	prefix string
+	suffix string
 }
 
 func NewLsCommand() *LsCommand {
@@ -31,6 +33,10 @@ func NewLsCommand() *LsCommand {
 	cmd.flagSet.StringVar(&cmd.omit, "omit", "", "")
 	cmd.flagSet.StringVar(&cmd.format, "f", "json", "")
 	cmd.flagSet.StringVar(&cmd.format, "format", "json", "")
+	cmd.flagSet.StringVar(&cmd.prefix, "e", "", "")
+	cmd.flagSet.StringVar(&cmd.prefix, "prefix", "", "")
+	cmd.flagSet.StringVar(&cmd.suffix, "u", "", "")
+	cmd.flagSet.StringVar(&cmd.suffix, "suffix", "", "")
 
 	// Don't print unneeded usage
 	cmd.flagSet.Usage = func() {}
@@ -66,6 +72,10 @@ func (cmd *LsCommand) Apply(m *manager.Manager) error {
 	}
 
 	tags := m.GetTags(cmd.regex, cmd.pick, cmd.omit)
+
+	// Append prefixes or suffixes to keys
+	tags = m.PrefixTags(tags, cmd.prefix)
+	tags = m.SuffixTags(tags, cmd.suffix)
 
 	// Retrieve the specified format method
 	format, _ := manager.Formats[cmd.format]
