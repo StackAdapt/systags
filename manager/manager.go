@@ -264,8 +264,11 @@ func (m *Manager) SaveFiles() error {
 
 // UpdateRemote fetches remote tags from the instance
 // it's currently running on. This operation may take
-// some time to complete, controlled by timeout.
-func (m *Manager) UpdateRemote(timeout time.Duration) error {
+// some time to complete, controlled by timeout. If a
+// retry duration is provided, this function will auto
+// retry for the duration if empty tags are returned.
+// A bounded exponential backoff strategy is employed.
+func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration) error {
 
 	// TODO:
 	// At the moment, only AWS is supported, but if you want
@@ -274,12 +277,45 @@ func (m *Manager) UpdateRemote(timeout time.Duration) error {
 	// which cloud provider is being used and add the feature
 	// to update the tags similar to how it's done now in AWS.
 
-	result, err := getAwsTags(m.logger, timeout)
-	if err != nil {
-		return err
+	var err error
+	var res Tags
+
+	// Sleep duration to start with
+	curInterval := 1 * time.Second
+
+	// Maximum duration to sleep for
+	maxInterval := 5 * time.Second
+
+	startTime := time.Now()
+	untilTime := startTime.Add(retry)
+
+	for {
+		res, err = getAwsTags(m.logger, timeout)
+		if err != nil {
+			return err
+		}
+
+		// Tags are not empty or we have reached time limit
+		if len(res) > 0 || time.Since(startTime) > retry {
+			break
+		}
+
+		// Avoid exceeding the time limit
+		interval := time.Until(untilTime)
+		if interval > curInterval {
+			interval = curInterval
+		}
+
+		time.Sleep(interval)
+
+		// Adjust sleep duration to take longer the next time
+		curInterval = time.Duration(float64(curInterval) * 2)
+		if curInterval > maxInterval {
+			curInterval = maxInterval
+		}
 	}
 
-	m.remote = result
+	m.remote = res
 	return nil
 }
 
