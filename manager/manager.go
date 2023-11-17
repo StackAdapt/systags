@@ -3,13 +3,12 @@ package manager
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
-
-	"golang.org/x/exp/slog"
 )
 
 // Tags describe a map of key/value pairs
@@ -45,9 +44,9 @@ func NewManager() *Manager {
 	m := Manager{
 		ConfigDir: "/etc/systags.d",
 		SystemDir: "/var/lib/systags",
-		logger:    slog.Default(),
 	}
 
+	m.SetLogger(nil)
 	m.Reset()
 
 	return &m
