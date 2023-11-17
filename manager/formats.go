@@ -11,6 +11,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// InvalidConsulMetaKey targets invalid chars in metadata keys
+var InvalidConsulMetaKey = regexp.MustCompile("[^a-zA-Z0-9_-]")
+
 // FormatJson attempts to convert tags into a JSON
 // string. Returns error if the conversion fails.
 func FormatJson(tags Tags) (string, error) {
@@ -174,10 +177,19 @@ func FormatTelegraf(tags Tags) (string, error) {
 // conversion fails.
 func FormatConsul(tags Tags) (string, error) {
 
+	// Final clean tags
+	clean := make(Tags)
+
+	for k, v := range tags {
+		// Replace any invalid characters with an underscore
+		key := InvalidConsulMetaKey.ReplaceAllString(k, "_")
+		clean[key] = v
+	}
+
 	consul := struct {
 		NodeMeta Tags `json:"node_meta"`
 	}{
-		NodeMeta: tags,
+		NodeMeta: clean,
 	}
 
 	// Try and convert specified consul data to JSON
