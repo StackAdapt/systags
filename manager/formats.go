@@ -177,19 +177,25 @@ func FormatTelegraf(tags Tags) (string, error) {
 // conversion fails.
 func FormatConsul(tags Tags) (string, error) {
 
-	// Final clean tags
-	clean := make(Tags)
+	filtered := make(Tags)
+	// Iterate through all the tags
+	for key, value := range tags {
 
-	for k, v := range tags {
+		// Skip empty
+		if key == "" {
+			continue
+		}
+
 		// Replace any invalid characters with an underscore
-		key := InvalidConsulMetaKey.ReplaceAllString(k, "_")
-		clean[key] = v
+		k := InvalidConsulMetaKey.ReplaceAllString(key, "_")
+
+		filtered[k] = value // Keys are deduplicated here
 	}
 
 	consul := struct {
 		NodeMeta Tags `json:"node_meta"`
 	}{
-		NodeMeta: clean,
+		NodeMeta: filtered,
 	}
 
 	// Try and convert specified consul data to JSON
