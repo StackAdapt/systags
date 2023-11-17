@@ -9,7 +9,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// DOCS:
+// ColorWriter is a custom writer that adds color to the output.
 type ColorWriter struct {
 	w     *os.File
 	color *color.Color
@@ -19,7 +19,9 @@ func (cw *ColorWriter) Write(p []byte) (n int, err error) {
 	return cw.w.Write([]byte(cw.color.Sprint(string(p))))
 }
 
-// DOCS:
+// LogHandler is a custom slog handler that routes log messages to different
+// loggers based on their severity level. It embeds slog.Handler and defines
+// loggers for different severity levels like Debug, Info, Warn, and Error.
 type LogHandler struct {
 	slog.Handler
 	Debug *log.Logger
