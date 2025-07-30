@@ -3,13 +3,12 @@ package manager
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
-
-	"golang.org/x/exp/slog"
 )
 
 // Tags describe a map of key/value pairs
@@ -45,9 +44,9 @@ func NewManager() *Manager {
 	m := Manager{
 		ConfigDir: "/etc/systags.d",
 		SystemDir: "/var/lib/systags",
-		logger:    slog.Default(),
 	}
 
+	m.SetLogger(nil)
 	m.Reset()
 
 	return &m
@@ -84,6 +83,8 @@ func (m *Manager) Reset() {
 // Manager's internal config, remote, and system tags.
 func (m *Manager) LoadFiles() error {
 
+	logger := m.GetLogger()
+
 	configData := make(Tags)
 	remoteData := make(Tags)
 	systemData := make(Tags)
@@ -93,7 +94,7 @@ func (m *Manager) LoadFiles() error {
 
 	if err == nil {
 
-		m.logger.Debug("reading config directory: " + m.ConfigDir)
+		logger.Debug("reading config directory: " + m.ConfigDir)
 
 		// Iterate through all config files
 		for _, file := range configFiles {
@@ -112,7 +113,7 @@ func (m *Manager) LoadFiles() error {
 			// Construct the full path to the current config file
 			configFile := filepath.Join(m.ConfigDir, file.Name())
 
-			m.logger.Debug(configFile)
+			logger.Debug(configFile)
 
 			// Attempt to read the contents of the file
 			configBytes, err := os.ReadFile(configFile)
@@ -141,7 +142,7 @@ func (m *Manager) LoadFiles() error {
 	// Check if remote file exists and then read it
 	if _, err := os.Stat(remoteFile); err == nil {
 
-		m.logger.Debug("reading remote file: " + remoteFile)
+		logger.Debug("reading remote file: " + remoteFile)
 
 		// Attempt to read the contents of the file
 		remoteBytes, err := os.ReadFile(remoteFile)
@@ -159,7 +160,7 @@ func (m *Manager) LoadFiles() error {
 	// Check if system file exists and then read it
 	if _, err := os.Stat(systemFile); err == nil {
 
-		m.logger.Debug("reading system file: " + systemFile)
+		logger.Debug("reading system file: " + systemFile)
 
 		// Attempt to read the contents of the file
 		systemBytes, err := os.ReadFile(systemFile)
@@ -187,6 +188,8 @@ func (m *Manager) LoadFiles() error {
 // to create a backup of the existing files.
 func (m *Manager) SaveFiles() error {
 
+	logger := m.GetLogger()
+
 	// Construct the full path to the system directory files
 	remoteFile := filepath.Join(m.SystemDir, "remote.json")
 	systemFile := filepath.Join(m.SystemDir, "system.json")
@@ -208,7 +211,7 @@ func (m *Manager) SaveFiles() error {
 
 		remoteBackup := remoteFile + ".bak"
 
-		m.logger.Debug("writing remote backup: " + remoteBackup)
+		logger.Debug("writing remote backup: " + remoteBackup)
 
 		// Attempt to read the contents of the file
 		remoteBytes, err := os.ReadFile(remoteFile)
@@ -228,7 +231,7 @@ func (m *Manager) SaveFiles() error {
 
 		systemBackup := systemFile + ".bak"
 
-		m.logger.Debug("writing system backup: " + systemBackup)
+		logger.Debug("writing system backup: " + systemBackup)
 
 		// Attempt to read the contents of the file
 		systemBytes, err := os.ReadFile(systemFile)
@@ -243,7 +246,7 @@ func (m *Manager) SaveFiles() error {
 		}
 	}
 
-	m.logger.Debug("writing remote file: " + remoteFile)
+	logger.Debug("writing remote file: " + remoteFile)
 
 	// Attempt to write the current tag content
 	err = os.WriteFile(remoteFile, remoteJson, 0666)
@@ -251,7 +254,7 @@ func (m *Manager) SaveFiles() error {
 		return err
 	}
 
-	m.logger.Debug("writing system file: " + systemFile)
+	logger.Debug("writing system file: " + systemFile)
 
 	// Attempt to write the current tag content
 	err = os.WriteFile(systemFile, systemJson, 0666)
@@ -274,7 +277,7 @@ func (m *Manager) UpdateRemote(timeout time.Duration) error {
 	// which cloud provider is being used and add the feature
 	// to update the tags similar to how it's done now in AWS.
 
-	result, err := getAwsTags(m.logger, timeout)
+	result, err := getAwsTags(m.GetLogger(), timeout)
 	if err != nil {
 		return err
 	}
