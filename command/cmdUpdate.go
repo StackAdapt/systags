@@ -23,7 +23,7 @@ func NewUpdateCommand() *UpdateCommand {
 
 	cmd.flagSet.DurationVar(&cmd.timeout, "t", 5*time.Second, "")
 	cmd.flagSet.DurationVar(&cmd.timeout, "timeout", 5*time.Second, "")
-	cmd.flagSet.DurationVar(&cmd.retry, "r", 0*time.Second, "")
+	cmd.flagSet.DurationVar(&cmd.retry, "r", 0*time.Second, "") // TODO: Does this get overwritten by `--retry` default?
 	cmd.flagSet.DurationVar(&cmd.retry, "retry", 0*time.Second, "")
 
 	// Don't print unneeded usage
