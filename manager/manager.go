@@ -271,6 +271,10 @@ func (m *Manager) SaveFiles() error {
 // retry duration is provided, this function will auto
 // retry for the duration if empty tags are returned.
 // A bounded exponential backoff strategy is employed.
+// If the required keys slice is provided, the function
+// will keep retrying until all the required keys are
+// present in the fetched tags or until the retry
+// duration is reached.
 func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration, requiredKeys []string) error {
 
 	// TODO:
@@ -307,8 +311,12 @@ func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration, requi
 			return err
 		}
 
+		if len(requiredKeys) > 0 && hasRequiredKeys(res, requiredKeys) {
+			break
+		}
+
 		// Tags are not empty or we have reached time limit
-		if (len(res) > 0 && hasRequiredKeys(res, requiredKeys)) || time.Since(startTime) > retry {
+		if len(res) > 0 || time.Since(startTime) > retry {
 			break
 		}
 

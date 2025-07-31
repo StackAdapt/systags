@@ -10,9 +10,9 @@ import (
 
 type UpdateCommand struct {
 	baseCommand
-	timeout     time.Duration
-	retry       time.Duration
-	requredKeys StringArray
+	timeout time.Duration
+	retry   time.Duration
+	keys    string
 }
 
 type StringArray []string
@@ -40,8 +40,8 @@ func NewUpdateCommand() *UpdateCommand {
 	cmd.flagSet.DurationVar(&cmd.timeout, "timeout", 5*time.Second, "")
 	cmd.flagSet.DurationVar(&cmd.retry, "r", 0*time.Second, "") // TODO: Does this get overwritten by `--retry` default?
 	cmd.flagSet.DurationVar(&cmd.retry, "retry", 0*time.Second, "")
-	cmd.flagSet.Var(&cmd.requredKeys, "k", "")
-	cmd.flagSet.Var(&cmd.requredKeys, "requried_keys", "")
+	cmd.flagSet.StringVar(&cmd.keys, "k", "", "")
+	cmd.flagSet.StringVar(&cmd.keys, "keys", "", "")
 
 	// Don't print unneeded usage
 	cmd.flagSet.Usage = func() {}
@@ -56,7 +56,7 @@ func (cmd *UpdateCommand) Apply(m *manager.Manager) error {
 		return err
 	}
 
-	err = m.UpdateRemote(cmd.timeout, cmd.retry, cmd.requredKeys)
+	err = m.UpdateRemote(cmd.timeout, cmd.retry, strings.Split(cmd.keys, ","))
 	if err != nil {
 		return err
 	}
