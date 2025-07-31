@@ -314,7 +314,7 @@ func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration, requi
 		if len(requiredKeys) > 0 && hasRequiredKeys(res, requiredKeys) {
 			break
 		}
-
+    
 		// Tags are not empty or we have reached time limit
 		if len(res) > 0 || time.Since(startTime) > retry {
 			break

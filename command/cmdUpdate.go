@@ -15,19 +15,6 @@ type UpdateCommand struct {
 	keys    string
 }
 
-type StringArray []string
-
-// String is the method to format the flag's value, part of the flag.Value interface.
-func (s *StringArray) String() string {
-	return strings.Join(*s, ",")
-}
-
-// Set is the method to set the flag value, part of the flag.Value interface.
-func (s *StringArray) Set(value string) error {
-	*s = strings.Split(value, ",")
-	return nil
-}
-
 func NewUpdateCommand() *UpdateCommand {
 
 	cmd := &UpdateCommand{
