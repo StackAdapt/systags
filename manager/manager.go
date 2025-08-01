@@ -296,12 +296,14 @@ func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration, requi
 	startTime := time.Now()
 	untilTime := startTime.Add(retry)
 
-	hasRequiredKeys := func(tags Tags, keys []string) bool {
-		for _, k := range keys {
+	hasRequiredKeys := func(tags Tags) bool {
+
+		for _, k := range requiredKeys {
 			if _, ok := tags[k]; !ok {
 				return false
 			}
 		}
+
 		return true
 	}
 
@@ -311,7 +313,8 @@ func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration, requi
 			return err
 		}
 
-		if len(requiredKeys) > 0 && hasRequiredKeys(res, requiredKeys) {
+		// Check whether all the required keys have values
+		if len(requiredKeys) > 0 && hasRequiredKeys(res) {
 			break
 		}
     
@@ -334,6 +337,8 @@ func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration, requi
 			curInterval = maxInterval
 		}
 	}
+
+	// TODO: Should we return an error if required keys and len(res) condition not met?
 
 	m.remote = res
 	return nil

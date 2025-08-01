@@ -43,7 +43,12 @@ func (cmd *UpdateCommand) Apply(m *manager.Manager) error {
 		return err
 	}
 
-	err = m.UpdateRemote(cmd.timeout, cmd.retry, strings.Split(cmd.keys, ","))
+	var keys []string
+	if cmd.keys != "" {
+		keys = strings.Split(cmd.keys, ",")
+	}
+
+	err = m.UpdateRemote(cmd.timeout, cmd.retry, keys)
 	if err != nil {
 		return err
 	}
