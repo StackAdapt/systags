@@ -45,6 +45,7 @@ func (cmd *HelpCommand) Apply(m *manager.Manager) error {
 			update
 				-t|-timeout (duration) [optional = 5*time.Second]
 				-r|-retry (duration) [optional = 0*time.Second]
+				-k|-keys (string) [optional = ""]
 
 			ls
 				-r|-regex (bool) [optional = false]

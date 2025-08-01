@@ -271,7 +271,11 @@ func (m *Manager) SaveFiles() error {
 // retry duration is provided, this function will auto
 // retry for the duration if empty tags are returned.
 // A bounded exponential backoff strategy is employed.
-func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration) error {
+// If the required keys slice is provided, the function
+// will keep retrying until all the required keys are
+// present in the fetched tags or until the retry
+// duration is reached.
+func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration, requiredKeys []string) error {
 
 	// TODO:
 	// At the moment, only AWS is supported, but if you want
@@ -292,12 +296,28 @@ func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration) error
 	startTime := time.Now()
 	untilTime := startTime.Add(retry)
 
+	hasRequiredKeys := func(tags Tags) bool {
+
+		for _, k := range requiredKeys {
+			if _, ok := tags[k]; !ok {
+				return false
+			}
+		}
+
+		return true
+	}
+
 	for {
 		res, err = getAwsTags(m.GetLogger(), timeout)
 		if err != nil {
 			return err
 		}
 
+		// Check whether all the required keys have values
+		if len(requiredKeys) > 0 && hasRequiredKeys(res) {
+			break
+		}
+    
 		// Tags are not empty or we have reached time limit
 		if len(res) > 0 || time.Since(startTime) > retry {
 			break
@@ -317,6 +337,8 @@ func (m *Manager) UpdateRemote(timeout time.Duration, retry time.Duration) error
 			curInterval = maxInterval
 		}
 	}
+
+	// TODO: Should we return an error if required keys and len(res) condition not met?
 
 	m.remote = res
 	return nil
