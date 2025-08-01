@@ -7,5 +7,5 @@ func AppName() string {
 
 // Version returns the current manager version
 func Version() string {
-	return "0.3.0"
+	return "0.4.0"
 }
